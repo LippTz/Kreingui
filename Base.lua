@@ -1,4 +1,4 @@
---// KreinHub - Final Base Script
+--// KreinHub - Final Base Script with Proper Minimize
 local Krein = {}
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
@@ -111,7 +111,7 @@ Close.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
 Close.TextColor3 = Color3.fromRGB(15, 15, 15)
 Close.ZIndex = 5
 
--- Minimize Logic (posisi, judul, animasi)
+-- Minimize Logic (dengan fade & sembunyikan semua elemen)
 local isMinimized = false
 local lastPosition = Main.Position
 
@@ -121,19 +121,22 @@ Minimize.MouseButton1Click:Connect(function()
 	if isMinimized then
 		lastPosition = Main.Position
 
-		TweenService:Create(Main, TweenInfoFade, {
-			Position = UDim2.new(0.5, -100, 0.1, 0),
-			Size = UDim2.new(0, 200, 0, 50)
-		}):Play()
-
 		for _, v in pairs({TabContainer, ContentContainer, Title}) do
-			TweenService:Create(v, TweenInfoFade, {BackgroundTransparency = 1, TextTransparency = 1}):Play()
+			TweenService:Create(v, TweenInfoFade, {
+				BackgroundTransparency = 1,
+				TextTransparency = 1
+			}):Play()
 		end
 
 		task.delay(0.4, function()
 			TabContainer.Visible = false
 			ContentContainer.Visible = false
 			Title.Visible = false
+
+			TweenService:Create(Main, TweenInfoFade, {
+				Position = UDim2.new(0.5, -100, 0.1, 0),
+				Size = UDim2.new(0, 200, 0, 50)
+			}):Play()
 		end)
 
 	else
@@ -151,7 +154,10 @@ Minimize.MouseButton1Click:Connect(function()
 		end
 
 		for _, v in pairs({TabContainer, ContentContainer, Title}) do
-			TweenService:Create(v, TweenInfoFade, {BackgroundTransparency = 0, TextTransparency = 0}):Play()
+			TweenService:Create(v, TweenInfoFade, {
+				BackgroundTransparency = 0,
+				TextTransparency = 0
+			}):Play()
 		end
 	end
 end)
