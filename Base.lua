@@ -1,83 +1,80 @@
--- KreinHub Base GUI (Modular)
--- Upload this to GitHub and call it via loadstring()
-
-local KreinHub = {}
-local Tabs = {}
+-- KreinHub UI Library (Base.lua)
+-- Upload this to GitHub (raw) and call it with loadstring from Loader.lua
 
 local player = game.Players.LocalPlayer
 local guiService = player:WaitForChild("PlayerGui")
 
--- UI Base
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "KreinHub"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.IgnoreGuiInset = true
 ScreenGui.Parent = guiService
 
+-- Global Text Style
+_G.KreinTextStyle = {
+    Font = Enum.Font.GothamSemibold,
+    Size = 16,
+    Color = Color3.fromRGB(240, 240, 240)
+}
+
+-- Container
 local MainFrame = Instance.new("Frame")
+MainFrame.Name = "MainFrame"
 MainFrame.Size = UDim2.new(0, 400, 0, 300)
 MainFrame.Position = UDim2.new(0.5, -200, 0.5, -150)
-MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+MainFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 40)
 MainFrame.BorderSizePixel = 0
+MainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
 MainFrame.Parent = ScreenGui
-MainFrame.Active = true
-MainFrame.Draggable = true
 
--- Top Bar
-local TopBar = Instance.new("Frame")
-TopBar.Size = UDim2.new(1, 0, 0, 40)
-TopBar.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-TopBar.Parent = MainFrame
+local UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(0, 8)
+UICorner.Parent = MainFrame
 
-local GuiName = Instance.new("TextLabel")
-GuiName.Size = UDim2.new(1, 0, 1, 0)
-GuiName.Text = "KreinHub"
-GuiName.Font = Enum.Font.SourceSansBold
-GuiName.TextSize = 20
-GuiName.TextColor3 = Color3.new(1, 1, 1)
-GuiName.BackgroundTransparency = 1
-GuiName.Parent = TopBar
-
--- Tab Container
+-- Tab Buttons (Left Side)
 local TabContainer = Instance.new("Frame")
-TabContainer.Size = UDim2.new(0, 120, 1, -40)
-TabContainer.Position = UDim2.new(0, 0, 0, 40)
-TabContainer.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+TabContainer.Name = "TabContainer"
+TabContainer.Size = UDim2.new(0, 120, 1, 0)
+TabContainer.Position = UDim2.new(0, 0, 0, 0)
+TabContainer.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
 TabContainer.Parent = MainFrame
 
+local tabLayout = Instance.new("UIListLayout")
+tabLayout.Padding = UDim.new(0, 4)
+tabLayout.SortOrder = Enum.SortOrder.LayoutOrder
+tabLayout.Parent = TabContainer
+
+-- Content Panel
 local ContentContainer = Instance.new("Frame")
-ContentContainer.Size = UDim2.new(1, -120, 1, -40)
-ContentContainer.Position = UDim2.new(0, 120, 0, 40)
+ContentContainer.Name = "ContentContainer"
+ContentContainer.Size = UDim2.new(1, -120, 1, -10)
+ContentContainer.Position = UDim2.new(0, 125, 0, 5)
 ContentContainer.BackgroundTransparency = 1
 ContentContainer.Parent = MainFrame
 
--- Text style
-local TextStyle = {
-    Font = Enum.Font.SourceSans,
-    Size = 18,
-    Color = Color3.new(1, 1, 1)
-}
-
--- Utility for vertical layout
 local function addList(parent)
-    local layout = Instance.new("UIListLayout")
-    layout.SortOrder = Enum.SortOrder.LayoutOrder
-    layout.Padding = UDim.new(0, 5)
-    layout.Parent = parent
+    local list = Instance.new("UIListLayout")
+    list.Padding = UDim.new(0, 5)
+    list.SortOrder = Enum.SortOrder.LayoutOrder
+    list.Parent = parent
 end
 
--- Create Tab
+addList(ContentContainer)
+
+local Tabs = {}
+local KreinHub = {}
+
 function KreinHub:CreateTab(name)
     if Tabs[name] then return Tabs[name].button, Tabs[name].content end
 
     local btn = Instance.new("TextButton")
     btn.Text = name
     btn.Size = UDim2.new(1, -10, 0, 30)
-    btn.Position = UDim2.new(0, 5, 0, #TabContainer:GetChildren() * 35)
-    btn.BackgroundColor3 = Color3.fromRGB(45,45,45)
-    btn.TextColor3 = TextStyle.Color
-    btn.Font = TextStyle.Font
-    btn.TextSize = TextStyle.Size
+    btn.BackgroundColor3 = Color3.fromRGB(45, 45, 50)
+    btn.TextColor3 = _G.KreinTextStyle.Color
+    btn.Font = _G.KreinTextStyle.Font
+    btn.TextSize = _G.KreinTextStyle.Size
+    btn.BorderSizePixel = 0
     btn.Parent = TabContainer
 
     local content = Instance.new("Frame")
@@ -86,6 +83,7 @@ function KreinHub:CreateTab(name)
     content.BackgroundTransparency = 1
     content.Visible = false
     content.Parent = ContentContainer
+
     addList(content)
 
     btn.MouseButton1Click:Connect(function()
@@ -99,44 +97,42 @@ function KreinHub:CreateTab(name)
     return btn
 end
 
--- Add Button
 function KreinHub:AddButton(tabBtn, text, func)
     local tab = nil
     for _, v in pairs(Tabs) do
-        if v.button == tabBtn then tab = v; break end
+        if v.button == tabBtn then tab = v break end
     end
     if not tab then return end
 
     local b = Instance.new("TextButton")
     b.Text = text
     b.Size = UDim2.new(1, -10, 0, 30)
-    b.Position = UDim2.new(0, 5, 0, tab.count * 35 + 5)
-    b.BackgroundColor3 = Color3.fromRGB(60,60,60)
-    b.TextColor3 = TextStyle.Color
-    b.Font = TextStyle.Font
-    b.TextSize = TextStyle.Size
+    b.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+    b.TextColor3 = _G.KreinTextStyle.Color
+    b.Font = _G.KreinTextStyle.Font
+    b.TextSize = _G.KreinTextStyle.Size
+    b.BorderSizePixel = 0
     b.Parent = tab.content
-
     b.MouseButton1Click:Connect(func)
+
     tab.count += 1
 end
 
--- Add Toggle
 function KreinHub:AddToggle(tabBtn, text, func)
     local tab = nil
     for _, v in pairs(Tabs) do
-        if v.button == tabBtn then tab = v; break end
+        if v.button == tabBtn then tab = v break end
     end
     if not tab then return end
 
     local t = Instance.new("TextButton")
     t.Text = text .. ": OFF"
     t.Size = UDim2.new(1, -10, 0, 30)
-    t.Position = UDim2.new(0, 5, 0, tab.count * 35 + 5)
-    t.BackgroundColor3 = Color3.fromRGB(60,60,60)
-    t.TextColor3 = TextStyle.Color
-    t.Font = TextStyle.Font
-    t.TextSize = TextStyle.Size
+    t.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+    t.TextColor3 = _G.KreinTextStyle.Color
+    t.Font = _G.KreinTextStyle.Font
+    t.TextSize = _G.KreinTextStyle.Size
+    t.BorderSizePixel = 0
     t.Parent = tab.content
 
     local state = false
