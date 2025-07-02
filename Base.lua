@@ -1,4 +1,4 @@
---// Alif's Custom Script Hub (Modular Base) - Draggable & Responsive UI
+--// Alif's Custom Script Hub (Modular Base) - Draggable UI Ready
 
 -- UI Library Base (Base.lua)
 local player = game.Players.LocalPlayer
@@ -40,62 +40,20 @@ UICorner.CornerRadius = UDim.new(0, 8)
 
 -- GUI Title
 local TitleLabel = Instance.new("TextLabel")
-TitleLabel.Size = UDim2.new(1, -80, 0, 40)
-TitleLabel.Position = UDim2.new(0, 40, 0, 0)
+TitleLabel.Size = UDim2.new(1, 0, 0, 40)
+TitleLabel.Position = UDim2.new(0, 0, 0, 0)
 TitleLabel.BackgroundTransparency = 1
 TitleLabel.Text = "KreinHub"
 TitleLabel.Font = TitleStyle.Font
 TitleLabel.TextSize = TitleStyle.Size
 TitleLabel.TextColor3 = TitleStyle.Color
-TitleLabel.TextXAlignment = Enum.TextXAlignment.Center
 TitleLabel.Parent = MainFrame
 
--- Minimize and Close Buttons
-local function createButton(name, pos, callback)
-    local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(0, 30, 0, 30)
-    btn.Position = pos
-    btn.Text = name
-    btn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-    btn.TextColor3 = Color3.new(1,1,1)
-    btn.Parent = MainFrame
-    btn.MouseButton1Click:Connect(callback)
-    return btn
-end
-
-local isMinimized = false
-local originalSize = MainFrame.Size
-local minimizeBtn = createButton("-", UDim2.new(1, -65, 0, 5), function()
-    if isMinimized then
-        MainFrame.Size = originalSize
-        for _, obj in pairs(MainFrame:GetChildren()) do
-            if obj:IsA("Frame") and obj.Name ~= "TabContainer" then
-                obj.Visible = true
-            end
-        end
-    else
-        MainFrame.Size = UDim2.new(originalSize.X.Scale, originalSize.X.Offset, 0, 40)
-        for _, obj in pairs(MainFrame:GetChildren()) do
-            if obj:IsA("Frame") and obj.Name ~= "TabContainer" then
-                obj.Visible = false
-            end
-        end
-    end
-    isMinimized = not isMinimized
-end)
-
-local closeBtn = createButton("X", UDim2.new(1, -35, 0, 5), function()
-    ScreenGui:Destroy()
-end)
-
 -- Tab Container
-local TabContainer = Instance.new("ScrollingFrame")
+local TabContainer = Instance.new("Frame")
 TabContainer.Size = UDim2.new(0, 120, 1, -40)
 TabContainer.Position = UDim2.new(0, 0, 0, 40)
-TabContainer.CanvasSize = UDim2.new(0, 0, 0, 0)
-TabContainer.ScrollBarThickness = 4
 TabContainer.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-TabContainer.Name = "TabContainer"
 TabContainer.Parent = MainFrame
 
 local TabListLayout = Instance.new("UIListLayout")
@@ -119,7 +77,88 @@ function addList(parent)
     layout.Parent = parent
 end
 
--- Expose references for Loader.lua or external scripts
+_G.KreinHub = {}
+local Tabs = {}
+
+function _G.KreinHub:CreateTab(name)
+    if Tabs[name] then return Tabs[name].button, Tabs[name].content end
+
+    local btn = Instance.new("TextButton")
+    btn.Text = name
+    btn.Size = UDim2.new(1, -10, 0, 30)
+    btn.Parent = TabContainer
+    btn.BackgroundColor3 = Color3.fromRGB(45,45,45)
+    btn.TextColor3 = TextStyle.Color
+    btn.Font = TextStyle.Font
+    btn.TextSize = TextStyle.Size
+
+    local content = Instance.new("Frame")
+    content.Name = name .. "Content"
+    content.Size = UDim2.new(1, -10, 1, 0)
+    content.BackgroundTransparency = 1
+    content.Visible = false
+    content.Parent = ContentContainer
+    addList(content)
+
+    btn.MouseButton1Click:Connect(function()
+        for _, v in pairs(ContentContainer:GetChildren()) do
+            if v:IsA("Frame") then v.Visible = false end
+        end
+        content.Visible = true
+    end)
+
+    Tabs[name] = { button = btn, content = content, count = 0 }
+    return btn
+end
+
+function _G.KreinHub:AddButton(tabBtn, text, func)
+    local tab = nil
+    for _, v in pairs(Tabs) do
+        if v.button == tabBtn then tab = v; break end
+    end
+    if not tab then return end
+
+    local b = Instance.new("TextButton")
+    b.Text = text
+    b.Size = UDim2.new(1, -10, 0, 30)
+    b.Position = UDim2.new(0, 5, 0, tab.count * 35 + 5)
+    b.Parent = tab.content
+    b.BackgroundColor3 = Color3.fromRGB(60,60,60)
+    b.TextColor3 = TextStyle.Color
+    b.Font = TextStyle.Font
+    b.TextSize = TextStyle.Size
+    b.MouseButton1Click:Connect(func)
+
+    tab.count += 1
+end
+
+function _G.KreinHub:AddToggle(tabBtn, text, func)
+    local tab = nil
+    for _, v in pairs(Tabs) do
+        if v.button == tabBtn then tab = v; break end
+    end
+    if not tab then return end
+
+    local t = Instance.new("TextButton")
+    t.Text = text .. ": OFF"
+    t.Size = UDim2.new(1, -10, 0, 30)
+    t.Position = UDim2.new(0, 5, 0, tab.count * 35 + 5)
+    t.Parent = tab.content
+    t.BackgroundColor3 = Color3.fromRGB(60,60,60)
+    t.TextColor3 = TextStyle.Color
+    t.Font = TextStyle.Font
+    t.TextSize = TextStyle.Size
+
+    local state = false
+    t.MouseButton1Click:Connect(function()
+        state = not state
+        t.Text = text .. ": " .. (state and "ON" or "OFF")
+        func(state)
+    end)
+
+    tab.count += 1
+end
+
 _G.KreinBase = {
     ScreenGui = ScreenGui,
     MainFrame = MainFrame,
@@ -131,3 +170,9 @@ _G.KreinBase = {
 }
 
 print("✅ KreinBase initialized.")
+
+return {
+    CreateTab = function(...) return _G.KreinHub:CreateTab(...) end,
+    AddButton = function(...) return _G.KreinHub:AddButton(...) end,
+    AddToggle = function(...) return _G.KreinHub:AddToggle(...) end
+}
