@@ -77,6 +77,11 @@ SubText.Position = UDim2.new(0.5, 0, 0.65, 0)
 SubText.AnchorPoint = Vector2.new(0.5, 0.5)
 SubText.Parent = LoadingFrame
 
+-- Animate loading popup
+LoadingFrame:TweenSize(UDim2.new(0.35, 0, 0.5, 0), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 1.5, true)
+task.wait(1.2)
+
+-- Tulis animasi "Loading..." satu per satu, 3 kali
 local function Typewrite(text, label)
     label.Text = ""
     for i = 1, #text do
@@ -85,14 +90,14 @@ local function Typewrite(text, label)
     end
 end
 
-LoadingFrame:TweenSize(UDim2.new(0.35, 0, 0.5, 0), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 1.5, true)
-task.wait(1.2)
 for i = 1, 3 do
     Typewrite("Loading...", SubText)
     task.wait(0.4)
 end
 
+-- Sembunyikan loading dan lanjutkan ke GUI utama
 LoadingFrame:Destroy()
+
 task.wait(1)
 
 -- GUI UTAMA
@@ -108,100 +113,122 @@ MainFrame.Active = true
 MainFrame.Draggable = true
 MainFrame.Parent = ScreenGui
 
-local TopBar = Instance.new("Frame")
-TopBar.Size = UDim2.new(1, 0, 0, 40)
-TopBar.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-TopBar.BorderSizePixel = 0
-TopBar.Name = "TopBar"
-TopBar.Parent = MainFrame
+-- Header (berisi nama GUI + tombol)
+local Header = Instance.new("Frame")
+Header.Size = UDim2.new(1, 0, 0, 40)
+Header.BackgroundTransparency = 1
+Header.Name = "Header"
+Header.Parent = MainFrame
 
-local GuiTitle = Instance.new("TextLabel")
-GuiTitle.Text = "KreinGui"
-GuiTitle.Font = TitleStyle.Font
-GuiTitle.TextSize = TitleStyle.Size
-GuiTitle.TextColor3 = TitleStyle.Color
-GuiTitle.BackgroundTransparency = 1
-GuiTitle.Size = UDim2.new(1, -80, 1, 0)
-GuiTitle.Position = UDim2.new(0.5, -40, 0, 0)
-GuiTitle.TextXAlignment = Enum.TextXAlignment.Center
-GuiTitle.Parent = TopBar
+-- Nama GUI
+local Title = Instance.new("TextLabel")
+Title.Text = "KreinGui"
+Title.Font = TitleStyle.Font
+Title.TextSize = TitleStyle.Size
+Title.TextColor3 = TitleStyle.Color
+Title.BackgroundTransparency = 1
+Title.AnchorPoint = Vector2.new(0.5, 0.5)
+Title.Position = UDim2.new(0.5, 0, 0.5, 0)
+Title.Size = UDim2.new(0.6, 0, 1, 0)
+Title.Parent = Header
 
-local CloseButton = Instance.new("TextButton")
-CloseButton.Size = UDim2.new(0, 40, 1, 0)
-CloseButton.Position = UDim2.new(1, -40, 0, 0)
-CloseButton.Text = "X"
-CloseButton.Font = TextStyle.Font
-CloseButton.TextSize = TextStyle.Size
-CloseButton.TextColor3 = TextStyle.Color
-CloseButton.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
-CloseButton.Parent = TopBar
+-- Tombol Minimize
+local Minimize = Instance.new("TextButton")
+Minimize.Text = "-"
+Minimize.Font = TextStyle.Font
+Minimize.TextSize = 22
+Minimize.TextColor3 = TextStyle.Color
+Minimize.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+Minimize.Size = UDim2.new(0, 30, 0, 30)
+Minimize.Position = UDim2.new(1, -65, 0.5, -15)
+Minimize.AnchorPoint = Vector2.new(0, 0)
+Minimize.Parent = Header
 
-local MinimizeButton = Instance.new("TextButton")
-MinimizeButton.Size = UDim2.new(0, 40, 1, 0)
-MinimizeButton.Position = UDim2.new(1, -80, 0, 0)
-MinimizeButton.Text = "-"
-MinimizeButton.Font = TextStyle.Font
-MinimizeButton.TextSize = TextStyle.Size
-MinimizeButton.TextColor3 = TextStyle.Color
-MinimizeButton.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
-MinimizeButton.Parent = TopBar
+-- Tombol Close
+local Close = Instance.new("TextButton")
+Close.Text = "X"
+Close.Font = TextStyle.Font
+Close.TextSize = 22
+Close.TextColor3 = TextStyle.Color
+Close.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+Close.Size = UDim2.new(0, 30, 0, 30)
+Close.Position = UDim2.new(1, -30, 0.5, -15)
+Close.AnchorPoint = Vector2.new(0, 0)
+Close.Parent = Header
 
+-- Tab Container
 local TabContainer = Instance.new("Frame")
-TabContainer.Size = UDim2.new(0, 120, 1, -40)
+TabContainer.Size = UDim2.new(0.25, 0, 1, -40)
 TabContainer.Position = UDim2.new(0, 0, 0, 40)
 TabContainer.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-TabContainer.Name = "TabContainer"
 TabContainer.Parent = MainFrame
 
+local TabLayout = Instance.new("UIListLayout")
+TabLayout.SortOrder = Enum.SortOrder.LayoutOrder
+TabLayout.Padding = UDim.new(0, 4)
+TabLayout.Parent = TabContainer
+
+-- Content Container
 local ContentContainer = Instance.new("Frame")
-ContentContainer.Size = UDim2.new(1, -120, 1, -40)
-ContentContainer.Position = UDim2.new(0, 120, 0, 40)
-ContentContainer.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-ContentContainer.Name = "ContentContainer"
+ContentContainer.Size = UDim2.new(0.75, 0, 1, -40)
+ContentContainer.Position = UDim2.new(0.25, 0, 0, 40)
+ContentContainer.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
 ContentContainer.Parent = MainFrame
 
-local isMinimized = false
-local originalHeight = MainFrame.Size.Y.Offset
+local ContentLayout = Instance.new("UIListLayout")
+ContentLayout.SortOrder = Enum.SortOrder.LayoutOrder
+ContentLayout.Padding = UDim.new(0, 6)
+ContentLayout.Parent = ContentContainer
 
-MinimizeButton.MouseButton1Click:Connect(function()
-    isMinimized = not isMinimized
-    if isMinimized then
+-- Sistem Minimize
+local originalSize = MainFrame.Size
+local minimized = false
+
+Minimize.MouseButton1Click:Connect(function()
+    minimized = not minimized
+    if minimized then
+        -- minimize: hanya tinggi header
+        MainFrame:TweenSize(UDim2.new(originalSize.X.Scale, originalSize.X.Offset, 0, 40), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.3, true)
         TabContainer.Visible = false
         ContentContainer.Visible = false
-        MainFrame:TweenSize(UDim2.new(MainFrame.Size.X.Scale, 0, 0, 40), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.3, true)
     else
+        MainFrame:TweenSize(originalSize, Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.3, true)
         TabContainer.Visible = true
         ContentContainer.Visible = true
-        MainFrame:TweenSize(UDim2.new(MainFrame.Size.X.Scale, 0, 0, originalHeight), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.3, true)
     end
 end)
 
-CloseButton.MouseButton1Click:Connect(function()
+-- Sistem Close
+Close.MouseButton1Click:Connect(function()
     ScreenGui:Destroy()
 end)
 
--- Library Functions
+-- Modul Kustomisasi Tab
 local KreinHub = {}
 
-function KreinHub:CreateTab(name)
-    local tabButton = Instance.new("TextButton")
-    tabButton.Size = UDim2.new(1, 0, 0, 30)
-    tabButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-    tabButton.Text = name
-    tabButton.Font = TextStyle.Font
-    tabButton.TextSize = TextStyle.Size
-    tabButton.TextColor3 = TextStyle.Color
-    tabButton.Parent = TabContainer
+function KreinHub:CreateTab(tabName)
+    local newTab = Instance.new("TextButton")
+    newTab.Text = tabName
+    newTab.Font = TextStyle.Font
+    newTab.TextSize = TextStyle.Size
+    newTab.TextColor3 = TextStyle.Color
+    newTab.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+    newTab.Size = UDim2.new(1, -10, 0, 30)
+    newTab.Parent = TabContainer
 
     local container = Instance.new("Frame")
     container.Size = UDim2.new(1, 0, 1, 0)
     container.BackgroundTransparency = 1
     container.Visible = false
-    container.Name = name .. "_Container"
     container.Parent = ContentContainer
 
-    tabButton.MouseButton1Click:Connect(function()
-        for _, frame in pairs(ContentContainer:GetChildren()) do
+    local layout = Instance.new("UIListLayout")
+    layout.SortOrder = Enum.SortOrder.LayoutOrder
+    layout.Padding = UDim.new(0, 6)
+    layout.Parent = container
+
+    newTab.MouseButton1Click:Connect(function()
+        for _, frame in ipairs(ContentContainer:GetChildren()) do
             if frame:IsA("Frame") then
                 frame.Visible = false
             end
@@ -212,35 +239,33 @@ function KreinHub:CreateTab(name)
     return container
 end
 
-function KreinHub:AddButton(container, name, callback)
+function KreinHub:AddButton(container, text, callback)
     local button = Instance.new("TextButton")
-    button.Size = UDim2.new(1, -10, 0, 30)
-    button.Position = UDim2.new(0, 5, 0, #container:GetChildren() * 35)
-    button.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
-    button.Text = name
+    button.Text = text
     button.Font = TextStyle.Font
     button.TextSize = TextStyle.Size
     button.TextColor3 = TextStyle.Color
+    button.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+    button.Size = UDim2.new(1, -10, 0, 30)
     button.Parent = container
 
     button.MouseButton1Click:Connect(callback)
 end
 
-function KreinHub:AddToggle(container, name, callback)
+function KreinHub:AddToggle(container, text, callback)
     local toggle = Instance.new("TextButton")
-    toggle.Size = UDim2.new(1, -10, 0, 30)
-    toggle.Position = UDim2.new(0, 5, 0, #container:GetChildren() * 35)
-    toggle.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
-    toggle.Text = name .. ": OFF"
+    toggle.Text = text .. ": OFF"
     toggle.Font = TextStyle.Font
     toggle.TextSize = TextStyle.Size
     toggle.TextColor3 = TextStyle.Color
+    toggle.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+    toggle.Size = UDim2.new(1, -10, 0, 30)
     toggle.Parent = container
 
     local state = false
     toggle.MouseButton1Click:Connect(function()
         state = not state
-        toggle.Text = name .. ": " .. (state and "ON" or "OFF")
+        toggle.Text = text .. ": " .. (state and "ON" or "OFF")
         callback(state)
     end)
 end
