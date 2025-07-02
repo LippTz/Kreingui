@@ -1,4 +1,4 @@
---// KreinHub - Final Base Script with Proper Minimize
+--// KreinHub - Final Base Script with Close Only & Smaller Mobile UI
 local Krein = {}
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
@@ -13,8 +13,8 @@ ScreenGui.ResetOnSpawn = false
 
 local Main = Instance.new("Frame", ScreenGui)
 Main.Name = "Main"
-Main.Size = UDim2.new(0, 600, 0, 400)
-Main.Position = UDim2.new(0.5, -300, 0.5, -200)
+Main.Size = UDim2.new(0, 450, 0, 300)
+Main.Position = UDim2.new(0.5, -225, 0.5, -150)
 Main.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
 Main.BorderSizePixel = 0
 Main.Visible = true
@@ -25,24 +25,24 @@ UICorner.CornerRadius = UDim.new(0, 8)
 -- Title
 local Title = Instance.new("TextLabel", Main)
 Title.Text = "KreinHub - Hacker Control"
-Title.Size = UDim2.new(1, 0, 0, 40)
+Title.Size = UDim2.new(1, 0, 0, 35)
 Title.BackgroundTransparency = 1
 Title.TextColor3 = Color3.fromRGB(0, 255, 100)
 Title.Font = Enum.Font.Code
-Title.TextSize = 22
+Title.TextSize = 20
 
 -- Tab Container
 local TabContainer = Instance.new("Frame", Main)
 TabContainer.Name = "TabContainer"
-TabContainer.Position = UDim2.new(0, 0, 0, 40)
-TabContainer.Size = UDim2.new(0, 120, 1, -40)
+TabContainer.Position = UDim2.new(0, 0, 0, 35)
+TabContainer.Size = UDim2.new(0, 100, 1, -35)
 TabContainer.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 
 -- Content Container
 local ContentContainer = Instance.new("Frame", Main)
 ContentContainer.Name = "ContentContainer"
-ContentContainer.Position = UDim2.new(0, 120, 0, 40)
-ContentContainer.Size = UDim2.new(1, -120, 1, -40)
+ContentContainer.Position = UDim2.new(0, 100, 0, 35)
+ContentContainer.Size = UDim2.new(1, -100, 1, -35)
 ContentContainer.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
 
 -- Notification System
@@ -89,88 +89,16 @@ UserInputService.InputBegan:Connect(function(input, gpe)
 	end
 end)
 
--- Tombol Minimize
-local Minimize = Instance.new("TextButton", Main)
-Minimize.Size = UDim2.new(0, 30, 0, 30)
-Minimize.Position = UDim2.new(1, -65, 0, 5)
-Minimize.Text = "-"
-Minimize.Font = Enum.Font.Code
-Minimize.TextSize = 20
-Minimize.BackgroundColor3 = Color3.fromRGB(0, 255, 100)
-Minimize.TextColor3 = Color3.fromRGB(15, 15, 15)
-Minimize.ZIndex = 5
-
 -- Tombol Close
 local Close = Instance.new("TextButton", Main)
-Close.Size = UDim2.new(0, 30, 0, 30)
-Close.Position = UDim2.new(1, -30, 0, 5)
+Close.Size = UDim2.new(0, 28, 0, 28)
+Close.Position = UDim2.new(1, -32, 0, 4)
 Close.Text = "X"
 Close.Font = Enum.Font.Code
-Close.TextSize = 18
+Close.TextSize = 16
 Close.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
 Close.TextColor3 = Color3.fromRGB(15, 15, 15)
 Close.ZIndex = 5
-
--- Minimize Logic (Fixed)
-local isMinimized = false
-local lastPosition = Main.Position
-local lastSize = Main.Size
-
-Minimize.MouseButton1Click:Connect(function()
-	isMinimized = not isMinimized
-
-	if isMinimized then
-		lastPosition = Main.Position
-		lastSize = Main.Size
-
-		for _, v in pairs({TabContainer, ContentContainer, Title}) do
-			if v:IsA("GuiObject") then
-				TweenService:Create(v, TweenInfoFade, {
-					TextTransparency = 1,
-					BackgroundTransparency = 1
-				}):Play()
-			end
-		end
-
-		task.delay(0.4, function()
-			TabContainer.Visible = false
-			ContentContainer.Visible = false
-			Title.Visible = false
-
-			TweenService:Create(Main, TweenInfoFade, {
-				Size = UDim2.new(0, 200, 0, 50),
-				Position = UDim2.new(0.5, -100, 0.5, -25)
-			}):Play()
-		end)
-	else
-		TweenService:Create(Main, TweenInfoFade, {
-			Size = lastSize,
-			Position = lastPosition
-		}):Play()
-
-		task.delay(0.4, function()
-			TabContainer.Visible = true
-			ContentContainer.Visible = true
-			Title.Visible = true
-
-			for _, v in pairs({TabContainer, ContentContainer, Title}) do
-				if v:IsA("GuiObject") then
-					v.TextTransparency = 1
-					v.BackgroundTransparency = 1
-				end
-			end
-
-			for _, v in pairs({TabContainer, ContentContainer, Title}) do
-				if v:IsA("GuiObject") then
-					TweenService:Create(v, TweenInfoFade, {
-						TextTransparency = 0,
-						BackgroundTransparency = 0
-					}):Play()
-				end
-			end
-		end)
-	end
-end)
 
 -- Close Logic
 Close.MouseButton1Click:Connect(function()
@@ -204,11 +132,11 @@ end)
 function Krein:CreateTab(name)
 	local Tab = Instance.new("TextButton", TabContainer)
 	Tab.Text = name
-	Tab.Size = UDim2.new(1, 0, 0, 30)
+	Tab.Size = UDim2.new(1, 0, 0, 28)
 	Tab.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 	Tab.TextColor3 = Color3.fromRGB(0, 255, 100)
 	Tab.Font = Enum.Font.Code
-	Tab.TextSize = 18
+	Tab.TextSize = 16
 
 	local Content = Instance.new("ScrollingFrame", ContentContainer)
 	Content.Size = UDim2.new(1, 0, 1, 0)
@@ -230,24 +158,24 @@ function Krein:CreateTab(name)
 		AddButton = function(self, text, callback)
 			local Btn = Instance.new("TextButton", Content)
 			Btn.Text = text
-			Btn.Size = UDim2.new(1, -10, 0, 30)
-			Btn.Position = UDim2.new(0, 5, 0, #Content:GetChildren() * 35)
+			Btn.Size = UDim2.new(1, -10, 0, 28)
+			Btn.Position = UDim2.new(0, 5, 0, #Content:GetChildren() * 32)
 			Btn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 			Btn.TextColor3 = Color3.fromRGB(0, 255, 100)
 			Btn.Font = Enum.Font.Code
-			Btn.TextSize = 18
+			Btn.TextSize = 16
 			Btn.MouseButton1Click:Connect(callback)
 		end,
 
 		AddToggle = function(self, text, callback)
 			local Toggle = Instance.new("TextButton", Content)
 			Toggle.Text = "[OFF] " .. text
-			Toggle.Size = UDim2.new(1, -10, 0, 30)
-			Toggle.Position = UDim2.new(0, 5, 0, #Content:GetChildren() * 35)
+			Toggle.Size = UDim2.new(1, -10, 0, 28)
+			Toggle.Position = UDim2.new(0, 5, 0, #Content:GetChildren() * 32)
 			Toggle.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 			Toggle.TextColor3 = Color3.fromRGB(0, 255, 100)
 			Toggle.Font = Enum.Font.Code
-			Toggle.TextSize = 18
+			Toggle.TextSize = 16
 
 			local state = false
 			Toggle.MouseButton1Click:Connect(function()
