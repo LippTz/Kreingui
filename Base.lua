@@ -54,7 +54,6 @@ local TabContainer = Instance.new("Frame")
 TabContainer.Size = UDim2.new(0, 120, 1, -40)
 TabContainer.Position = UDim2.new(0, 0, 0, 40)
 TabContainer.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-TabContainer.Name = "TabContainer"
 TabContainer.Parent = MainFrame
 
 local TabListLayout = Instance.new("UIListLayout")
@@ -88,4 +87,66 @@ _G.KreinBase = {
     addList = addList
 }
 
+-- Logic to allow external scripts to add UI elements easily
+function _G.KreinBase:CreateTab(name)
+    local button = Instance.new("TextButton")
+    button.Text = name
+    button.Size = UDim2.new(1, -10, 0, 30)
+    button.BackgroundColor3 = Color3.fromRGB(60,60,60)
+    button.TextColor3 = self.TextStyle.Color
+    button.Font = self.TextStyle.Font
+    button.TextSize = self.TextStyle.Size
+    button.Parent = self.TabContainer
+
+    local content = Instance.new("Frame")
+    content.Name = name.."Content"
+    content.Size = UDim2.new(1, 0, 1, 0)
+    content.BackgroundTransparency = 1
+    content.Visible = false
+    content.Parent = self.ContentContainer
+    self.addList(content)
+
+    button.MouseButton1Click:Connect(function()
+        for _, child in pairs(self.ContentContainer:GetChildren()) do
+            if child:IsA("Frame") then
+                child.Visible = false
+            end
+        end
+        content.Visible = true
+    end)
+
+    return button, content
+end
+
+function _G.KreinBase:AddButton(contentFrame, text, callback)
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(1, -10, 0, 30)
+    btn.BackgroundColor3 = Color3.fromRGB(50,50,50)
+    btn.Text = text
+    btn.TextColor3 = self.TextStyle.Color
+    btn.Font = self.TextStyle.Font
+    btn.TextSize = self.TextStyle.Size
+    btn.Parent = contentFrame
+    btn.MouseButton1Click:Connect(callback)
+end
+
+function _G.KreinBase:AddToggle(contentFrame, text, callback)
+    local toggle = Instance.new("TextButton")
+    toggle.Size = UDim2.new(1, -10, 0, 30)
+    toggle.BackgroundColor3 = Color3.fromRGB(50,50,50)
+    toggle.Text = text .. ": OFF"
+    toggle.TextColor3 = self.TextStyle.Color
+    toggle.Font = self.TextStyle.Font
+    toggle.TextSize = self.TextStyle.Size
+    toggle.Parent = contentFrame
+
+    local state = false
+    toggle.MouseButton1Click:Connect(function()
+        state = not state
+        toggle.Text = text .. ": " .. (state and "ON" or "OFF")
+        callback(state)
+    end)
+end
+
+print("✅ KreinBase initialized.")
 return _G.KreinBase
