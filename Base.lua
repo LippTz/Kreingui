@@ -1,4 +1,4 @@
---// KreinHub Base UI
+--// KreinHub - Base Script
 local Krein = {}
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
@@ -20,7 +20,7 @@ Main.Visible = true
 local UICorner = Instance.new("UICorner", Main)
 UICorner.CornerRadius = UDim.new(0, 8)
 
--- Hacker-style title
+-- Title
 local Title = Instance.new("TextLabel", Main)
 Title.Text = "KreinHub - Hacker Control"
 Title.Size = UDim2.new(1, 0, 0, 40)
@@ -65,7 +65,7 @@ local function Notify(title, message)
 	end)
 end
 
--- Save/Load Config
+-- Config Save/Load
 local ConfigFile = "KreinHub_Config.json"
 function Krein:SaveConfig(data)
 	writefile(ConfigFile, HttpService:JSONEncode(data))
@@ -80,10 +80,80 @@ function Krein:LoadConfig()
 	end
 end
 
--- Toggle Key
+-- Toggle GUI (RightControl)
 UserInputService.InputBegan:Connect(function(input, gpe)
 	if not gpe and input.KeyCode == Enum.KeyCode.RightControl then
 		Main.Visible = not Main.Visible
+	end
+end)
+
+-- Tombol Minimize
+local Minimize = Instance.new("TextButton", Main)
+Minimize.Size = UDim2.new(0, 30, 0, 30)
+Minimize.Position = UDim2.new(1, -65, 0, 5)
+Minimize.Text = "-"
+Minimize.Font = Enum.Font.Code
+Minimize.TextSize = 20
+Minimize.BackgroundColor3 = Color3.fromRGB(0, 255, 100)
+Minimize.TextColor3 = Color3.fromRGB(15, 15, 15)
+Minimize.ZIndex = 5
+
+-- Tombol Close
+local Close = Instance.new("TextButton", Main)
+Close.Size = UDim2.new(0, 30, 0, 30)
+Close.Position = UDim2.new(1, -30, 0, 5)
+Close.Text = "X"
+Close.Font = Enum.Font.Code
+Close.TextSize = 18
+Close.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
+Close.TextColor3 = Color3.fromRGB(15, 15, 15)
+Close.ZIndex = 5
+
+-- Minimize Logic dengan Simpan Posisi
+local isMinimized = false
+local lastPosition = Main.Position
+
+Minimize.MouseButton1Click:Connect(function()
+	isMinimized = not isMinimized
+	if isMinimized then
+		lastPosition = Main.Position
+		Main.Position = UDim2.new(0.5, -100, 0.1, 0)
+		Main.Size = UDim2.new(0, 200, 0, 50)
+		ContentContainer.Visible = false
+		TabContainer.Visible = false
+	else
+		Main.Position = lastPosition
+		Main.Size = UDim2.new(0, 600, 0, 400)
+		ContentContainer.Visible = true
+		TabContainer.Visible = true
+	end
+end)
+
+-- Close Logic
+Close.MouseButton1Click:Connect(function()
+	ScreenGui:Destroy()
+end)
+
+-- Drag Logic
+local dragToggle, dragInput, dragStart, startPos
+Main.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+		dragToggle = true
+		dragStart = input.Position
+		startPos = Main.Position
+
+		input.Changed:Connect(function()
+			if input.UserInputState == Enum.UserInputState.End then
+				dragToggle = false
+			end
+		end)
+	end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+	if dragToggle and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+		local delta = input.Position - dragStart
+		Main.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
 	end
 end)
 
@@ -125,7 +195,7 @@ function Krein:CreateTab(name)
 			Btn.TextSize = 18
 			Btn.MouseButton1Click:Connect(callback)
 		end,
-		
+
 		AddToggle = function(self, text, callback)
 			local Toggle = Instance.new("TextButton", Content)
 			Toggle.Text = "[OFF] " .. text
