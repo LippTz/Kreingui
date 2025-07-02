@@ -116,6 +116,61 @@ MainFrame.Visible = true
 MainFrame:TweenSize(UDim2.new(0.6, 0, 0.6, 0), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 1.2, true)
 task.wait(0.3)
 
+-- Header (Nama GUI dan Tombol)
+local Header = Instance.new("Frame")
+Header.Name = "Header"
+Header.Size = UDim2.new(1, 0, 0, 30)
+Header.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+Header.Parent = MainFrame
+
+local Title = Instance.new("TextLabel")
+Title.Text = "KreinGui"
+Title.Font = TitleStyle.Font
+Title.TextSize = TitleStyle.Size
+Title.TextColor3 = TitleStyle.Color
+Title.BackgroundTransparency = 1
+Title.Position = UDim2.new(0.5, 0, 0, 0)
+Title.AnchorPoint = Vector2.new(0.5, 0)
+Title.Size = UDim2.new(0, 200, 1, 0)
+Title.Parent = Header
+
+local Close = Instance.new("TextButton")
+Close.Size = UDim2.new(0, 30, 1, 0)
+Close.Position = UDim2.new(1, -30, 0, 0)
+Close.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
+Close.Text = "X"
+Close.Font = Enum.Font.SourceSansBold
+Close.TextSize = 18
+Close.TextColor3 = Color3.new(1, 1, 1)
+Close.Parent = Header
+
+local Minimize = Instance.new("TextButton")
+Minimize.Size = UDim2.new(0, 30, 1, 0)
+Minimize.Position = UDim2.new(1, -60, 0, 0)
+Minimize.BackgroundColor3 = Color3.fromRGB(255, 180, 0)
+Minimize.Text = "-"
+Minimize.Font = Enum.Font.SourceSansBold
+Minimize.TextSize = 18
+Minimize.TextColor3 = Color3.new(1, 1, 1)
+Minimize.Parent = Header
+
+-- Fungsi tombol
+local minimized = false
+local originalSize = MainFrame.Size
+
+Minimize.MouseButton1Click:Connect(function()
+    if minimized then
+        MainFrame:TweenSize(originalSize, Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.3, true)
+    else
+        MainFrame:TweenSize(UDim2.new(originalSize.X.Scale, originalSize.X.Offset, 0, 30), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.3, true)
+    end
+    minimized = not minimized
+end)
+
+Close.MouseButton1Click:Connect(function()
+    ScreenGui:Destroy()
+end)
+
 -- Tab dan Kontainer Isi
 local TabsFrame = Instance.new("Frame")
 TabsFrame.Name = "TabsFrame"
