@@ -77,6 +77,7 @@ function addList(parent)
     layout.Parent = parent
 end
 
+-- Global base export for loader
 _G.KreinBase = {
     ScreenGui = ScreenGui,
     MainFrame = MainFrame,
@@ -87,66 +88,102 @@ _G.KreinBase = {
     addList = addList
 }
 
--- Logic to allow external scripts to add UI elements easily
-function _G.KreinBase:CreateTab(name)
-    local button = Instance.new("TextButton")
-    button.Text = name
-    button.Size = UDim2.new(1, -10, 0, 30)
-    button.BackgroundColor3 = Color3.fromRGB(60,60,60)
-    button.TextColor3 = self.TextStyle.Color
-    button.Font = self.TextStyle.Font
-    button.TextSize = self.TextStyle.Size
-    button.Parent = self.TabContainer
+-- Exposed API to allow external use
+local Tabs = {}
+local KreinHub = {}
+
+function KreinHub:CreateTab(name)
+    if Tabs[name] then return Tabs[name].button, Tabs[name].content end
+
+    local btn = Instance.new("TextButton")
+    btn.Text = name
+    btn.Size = UDim2.new(1, -10, 0, 30)
+    btn.Parent = TabContainer
+    btn.BackgroundColor3 = Color3.fromRGB(45,45,45)
+    btn.TextColor3 = TextStyle.Color
+    btn.Font = TextStyle.Font
+    btn.TextSize = TextStyle.Size
 
     local content = Instance.new("Frame")
-    content.Name = name.."Content"
-    content.Size = UDim2.new(1, 0, 1, 0)
+    content.Name = name .. "Content"
+    content.Size = UDim2.new(1, -10, 1, -10)
     content.BackgroundTransparency = 1
     content.Visible = false
-    content.Parent = self.ContentContainer
-    self.addList(content)
+    content.Parent = ContentContainer
+    addList(content)
 
-    button.MouseButton1Click:Connect(function()
-        for _, child in pairs(self.ContentContainer:GetChildren()) do
-            if child:IsA("Frame") then
-                child.Visible = false
-            end
+    btn.MouseButton1Click:Connect(function()
+        for _, v in pairs(ContentContainer:GetChildren()) do
+            if v:IsA("Frame") then v.Visible = false end
         end
         content.Visible = true
     end)
 
-    return button, content
+    Tabs[name] = { button = btn, content = content, count = 0 }
+    return btn
 end
 
-function _G.KreinBase:AddButton(contentFrame, text, callback)
-    local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(1, -10, 0, 30)
-    btn.BackgroundColor3 = Color3.fromRGB(50,50,50)
-    btn.Text = text
-    btn.TextColor3 = self.TextStyle.Color
-    btn.Font = self.TextStyle.Font
-    btn.TextSize = self.TextStyle.Size
-    btn.Parent = contentFrame
-    btn.MouseButton1Click:Connect(callback)
+function KreinHub:AddButton(tabBtn, text, func)
+    local tab = nil
+    for _, v in pairs(Tabs) do
+        if v.button == tabBtn then tab = v; break end
+    end
+    if not tab then return end
+
+    local b = Instance.new("TextButton")
+    b.Text = text
+    b.Size = UDim2.new(1, -10, 0, 30)
+    b.Position = UDim2.new(0, 5, 0, tab.count * 35 + 5)
+    b.Parent = tab.content
+    b.BackgroundColor3 = Color3.fromRGB(60,60,60)
+    b.TextColor3 = TextStyle.Color
+    b.Font = TextStyle.Font
+    b.TextSize = TextStyle.Size
+    b.MouseButton1Click:Connect(func)
+
+    tab.count += 1
 end
 
-function _G.KreinBase:AddToggle(contentFrame, text, callback)
-    local toggle = Instance.new("TextButton")
-    toggle.Size = UDim2.new(1, -10, 0, 30)
-    toggle.BackgroundColor3 = Color3.fromRGB(50,50,50)
-    toggle.Text = text .. ": OFF"
-    toggle.TextColor3 = self.TextStyle.Color
-    toggle.Font = self.TextStyle.Font
-    toggle.TextSize = self.TextStyle.Size
-    toggle.Parent = contentFrame
+function KreinHub:AddToggle(tabBtn, text, func)
+    local tab = nil
+    for _, v in pairs(Tabs) do
+        if v.button == tabBtn then tab = v; break end
+    end
+    if not tab then return end
+
+    local t = Instance.new("TextButton")
+    t.Text = text .. ": OFF"
+    t.Size = UDim2.new(1, -10, 0, 30)
+    t.Position = UDim2.new(0, 5, 0, tab.count * 35 + 5)
+    t.Parent = tab.content
+    t.BackgroundColor3 = Color3.fromRGB(60,60,60)
+    t.TextColor3 = TextStyle.Color
+    t.Font = TextStyle.Font
+    t.TextSize = TextStyle.Size
 
     local state = false
-    toggle.MouseButton1Click:Connect(function()
+    t.MouseButton1Click:Connect(function()
         state = not state
-        toggle.Text = text .. ": " .. (state and "ON" or "OFF")
-        callback(state)
+        t.Text = text .. ": " .. (state and "ON" or "OFF")
+        func(state)
     end)
+
+    tab.count += 1
 end
 
-print("✅ KreinBase initialized.")
-return _G.KreinBase
+print("✅ KreinHub fully initialized.")
+
+-- Return full API
+return {
+    CreateTab = function(name)
+        return KreinHub:CreateTab(name)
+    end,
+
+    AddButton = function(tab, text, func)
+        return KreinHub:AddButton(tab, text, func)
+    end,
+
+    AddToggle = function(tab, text, func)
+        return KreinHub:AddToggle(tab, text, func)
+    end
+}
