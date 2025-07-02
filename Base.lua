@@ -111,7 +111,7 @@ Close.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
 Close.TextColor3 = Color3.fromRGB(15, 15, 15)
 Close.ZIndex = 5
 
--- Minimize Logic FIXED (dengan animasi, posisi, dan restore elemen)
+-- Minimize Logic (Fixed)
 local isMinimized = false
 local lastPosition = Main.Position
 local lastSize = Main.Size
@@ -120,61 +120,55 @@ Minimize.MouseButton1Click:Connect(function()
 	isMinimized = not isMinimized
 
 	if isMinimized then
-		-- Simpan posisi & ukuran terakhir
 		lastPosition = Main.Position
 		lastSize = Main.Size
 
-		-- Fade out elemen
 		for _, v in pairs({TabContainer, ContentContainer, Title}) do
 			if v:IsA("GuiObject") then
 				TweenService:Create(v, TweenInfoFade, {
-					BackgroundTransparency = 1,
-					TextTransparency = 1
+					TextTransparency = 1,
+					BackgroundTransparency = 1
 				}):Play()
 			end
 		end
 
-		-- Setelah fade, sembunyikan dan kecilkan GUI
 		task.delay(0.4, function()
 			TabContainer.Visible = false
 			ContentContainer.Visible = false
 			Title.Visible = false
 
 			TweenService:Create(Main, TweenInfoFade, {
-				Position = UDim2.new(0.5, -100, 0.1, 0),
-				Size = UDim2.new(0, 200, 0, 50)
+				Size = UDim2.new(0, 200, 0, 50),
+				Position = UDim2.new(0.5, -100, 0.5, -25)
 			}):Play()
 		end)
-
 	else
-		-- Restore ukuran & posisi
-		Main.Position = lastPosition
-		Main.Size = lastSize
+		TweenService:Create(Main, TweenInfoFade, {
+			Size = lastSize,
+			Position = lastPosition
+		}):Play()
 
-		-- Tampilkan kembali elemen
-		TabContainer.Visible = true
-		ContentContainer.Visible = true
-		Title.Visible = true
+		task.delay(0.4, function()
+			TabContainer.Visible = true
+			ContentContainer.Visible = true
+			Title.Visible = true
 
-		-- Set transparansi dulu
-		for _, v in pairs({TabContainer, ContentContainer, Title}) do
-			if v:IsA("GuiObject") then
-				v.BackgroundTransparency = 1
-				if v:IsA("TextLabel") or v:IsA("TextButton") then
+			for _, v in pairs({TabContainer, ContentContainer, Title}) do
+				if v:IsA("GuiObject") then
 					v.TextTransparency = 1
+					v.BackgroundTransparency = 1
 				end
 			end
-		end
 
-		-- Lalu fade-in semua
-		for _, v in pairs({TabContainer, ContentContainer, Title}) do
-			if v:IsA("GuiObject") then
-				TweenService:Create(v, TweenInfoFade, {
-					BackgroundTransparency = 0,
-					TextTransparency = 0
-				}):Play()
+			for _, v in pairs({TabContainer, ContentContainer, Title}) do
+				if v:IsA("GuiObject") then
+					TweenService:Create(v, TweenInfoFade, {
+						TextTransparency = 0,
+						BackgroundTransparency = 0
+					}):Play()
+				end
 			end
-		end
+		end)
 	end
 end)
 
