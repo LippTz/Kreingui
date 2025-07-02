@@ -1,8 +1,10 @@
---// KreinHub - Base Script
+--// KreinHub - Final Base Script
 local Krein = {}
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
 local HttpService = game:GetService("HttpService")
+local TweenService = game:GetService("TweenService")
+local TweenInfoFade = TweenInfo.new(0.4, Enum.EasingStyle.Sine, Enum.EasingDirection.Out)
 
 -- UI Setup
 local ScreenGui = Instance.new("ScreenGui", gethui and gethui() or game.CoreGui)
@@ -56,7 +58,7 @@ local function Notify(title, message)
 	Notif.Size = UDim2.new(0, 280, 0, 30)
 	Notif.AnchorPoint = Vector2.new(0, 1)
 
-	game:GetService("TweenService"):Create(Notif, TweenInfo.new(0.5), {
+	TweenService:Create(Notif, TweenInfo.new(0.5), {
 		Position = UDim2.new(1, -300, 1, -80)
 	}):Play()
 	
@@ -109,23 +111,48 @@ Close.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
 Close.TextColor3 = Color3.fromRGB(15, 15, 15)
 Close.ZIndex = 5
 
--- Minimize Logic dengan Simpan Posisi
+-- Minimize Logic (posisi, judul, animasi)
 local isMinimized = false
 local lastPosition = Main.Position
 
 Minimize.MouseButton1Click:Connect(function()
 	isMinimized = not isMinimized
+
 	if isMinimized then
 		lastPosition = Main.Position
-		Main.Position = UDim2.new(0.5, -100, 0.1, 0)
-		Main.Size = UDim2.new(0, 200, 0, 50)
-		ContentContainer.Visible = false
-		TabContainer.Visible = false
+
+		TweenService:Create(Main, TweenInfoFade, {
+			Position = UDim2.new(0.5, -100, 0.1, 0),
+			Size = UDim2.new(0, 200, 0, 50)
+		}):Play()
+
+		for _, v in pairs({TabContainer, ContentContainer, Title}) do
+			TweenService:Create(v, TweenInfoFade, {BackgroundTransparency = 1, TextTransparency = 1}):Play()
+		end
+
+		task.delay(0.4, function()
+			TabContainer.Visible = false
+			ContentContainer.Visible = false
+			Title.Visible = false
+		end)
+
 	else
 		Main.Position = lastPosition
 		Main.Size = UDim2.new(0, 600, 0, 400)
-		ContentContainer.Visible = true
 		TabContainer.Visible = true
+		ContentContainer.Visible = true
+		Title.Visible = true
+
+		for _, v in pairs({TabContainer, ContentContainer, Title}) do
+			v.BackgroundTransparency = 1
+			if v:IsA("TextLabel") or v:IsA("TextButton") then
+				v.TextTransparency = 1
+			end
+		end
+
+		for _, v in pairs({TabContainer, ContentContainer, Title}) do
+			TweenService:Create(v, TweenInfoFade, {BackgroundTransparency = 0, TextTransparency = 0}):Play()
+		end
 	end
 end)
 
@@ -134,7 +161,7 @@ Close.MouseButton1Click:Connect(function()
 	ScreenGui:Destroy()
 end)
 
--- Drag Logic
+-- Drag Support (Mouse & Touch)
 local dragToggle, dragInput, dragStart, startPos
 Main.InputBegan:Connect(function(input)
 	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
@@ -157,7 +184,7 @@ UserInputService.InputChanged:Connect(function(input)
 	end
 end)
 
--- API: Create Tab
+-- API: CreateTab, AddButton, AddToggle
 function Krein:CreateTab(name)
 	local Tab = Instance.new("TextButton", TabContainer)
 	Tab.Text = name
