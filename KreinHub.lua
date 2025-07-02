@@ -1,6 +1,4 @@
---// Alif's Custom Script Hub (Modular Base) - Draggable UI Ready
-
--- UI Library Base (Base.lua)
+--// KreinHub Base UI + Logic (Fully Modular)
 local player = game.Players.LocalPlayer
 local guiService = player:WaitForChild("PlayerGui")
 
@@ -10,7 +8,6 @@ ScreenGui.ResetOnSpawn = false
 ScreenGui.IgnoreGuiInset = true
 ScreenGui.Parent = guiService
 
--- Global Text Styles
 local TextStyle = {
     Font = Enum.Font.SourceSans,
     Size = 18,
@@ -23,7 +20,6 @@ local TitleStyle = {
     Color = Color3.new(1, 1, 1)
 }
 
--- GUI Main Frame
 local MainFrame = Instance.new("Frame")
 MainFrame.Size = UDim2.new(0.4, 0, 0.5, 0)
 MainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
@@ -38,54 +34,22 @@ MainFrame.Parent = ScreenGui
 local UICorner = Instance.new("UICorner", MainFrame)
 UICorner.CornerRadius = UDim.new(0, 8)
 
--- Header Menu
-local Header = Instance.new("Frame")
-Header.Size = UDim2.new(1, 0, 0, 40)
-Header.BackgroundTransparency = 1
-Header.Parent = MainFrame
-
--- GUI Title
 local TitleLabel = Instance.new("TextLabel")
-TitleLabel.Size = UDim2.new(1, -80, 1, 0)
-TitleLabel.Position = UDim2.new(0, 10, 0, 0)
+TitleLabel.Size = UDim2.new(1, 0, 0, 40)
+TitleLabel.Position = UDim2.new(0, 0, 0, 0)
 TitleLabel.BackgroundTransparency = 1
 TitleLabel.Text = "KreinGui"
 TitleLabel.Font = TitleStyle.Font
 TitleLabel.TextSize = TitleStyle.Size
 TitleLabel.TextColor3 = TitleStyle.Color
-TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
-TitleLabel.Parent = Header
-
--- Minimize Button
-local MinBtn = Instance.new("TextButton")
-MinBtn.Size = UDim2.new(0, 30, 0, 30)
-MinBtn.Position = UDim2.new(1, -70, 0.5, -15)
-MinBtn.Text = "_"
-MinBtn.Font = Enum.Font.SourceSansBold
-MinBtn.TextSize = 22
-MinBtn.TextColor3 = Color3.new(1,1,1)
-MinBtn.BackgroundColor3 = Color3.fromRGB(50,50,50)
-MinBtn.Parent = Header
-
--- Close Button
-local CloseBtn = Instance.new("TextButton")
-CloseBtn.Size = UDim2.new(0, 30, 0, 30)
-CloseBtn.Position = UDim2.new(1, -35, 0.5, -15)
-CloseBtn.Text = "X"
-CloseBtn.Font = Enum.Font.SourceSansBold
-CloseBtn.TextSize = 22
-CloseBtn.TextColor3 = Color3.new(1,1,1)
-CloseBtn.BackgroundColor3 = Color3.fromRGB(50,50,50)
-CloseBtn.Parent = Header
+TitleLabel.Parent = MainFrame
 
 -- Tab Container
-local TabContainer = Instance.new("ScrollingFrame")
+local TabContainer = Instance.new("Frame")
 TabContainer.Size = UDim2.new(0, 120, 1, -40)
 TabContainer.Position = UDim2.new(0, 0, 0, 40)
 TabContainer.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-TabContainer.ScrollBarThickness = 4
-TabContainer.CanvasSize = UDim2.new(0, 0, 0, 0)
-TabContainer.AutomaticCanvasSize = Enum.AutomaticSize.Y
+TabContainer.Name = "TabContainer"
 TabContainer.Parent = MainFrame
 
 local TabListLayout = Instance.new("UIListLayout")
@@ -101,43 +65,104 @@ ContentContainer.BackgroundTransparency = 1
 ContentContainer.Name = "ContentContainer"
 ContentContainer.Parent = MainFrame
 
--- Function for vertical layout in content
-function addList(parent)
-    local layout = Instance.new("UIListLayout")
-    layout.SortOrder = Enum.SortOrder.LayoutOrder
-    layout.Padding = UDim.new(0, 5)
-    layout.Parent = parent
+-- List helper
+local function addList(parent)
+	local layout = Instance.new("UIListLayout")
+	layout.SortOrder = Enum.SortOrder.LayoutOrder
+	layout.Padding = UDim.new(0, 5)
+	layout.Parent = parent
 end
 
--- Minimize logic
-local originalSize = MainFrame.Size
-local isMinimized = false
-MinBtn.MouseButton1Click:Connect(function()
-    if not isMinimized then
-        ContentContainer.Visible = false
-        TabContainer.Visible = false
-        MainFrame.Size = UDim2.new(originalSize.X.Scale, originalSize.X.Offset, 0, 50)
-    else
-        ContentContainer.Visible = true
-        TabContainer.Visible = true
-        MainFrame.Size = originalSize
-    end
-    isMinimized = not isMinimized
-end)
+-- Logic API
+local KreinHub = {}
+local Tabs = {}
 
--- Close logic
-CloseBtn.MouseButton1Click:Connect(function()
-    ScreenGui:Destroy()
-end)
+function KreinHub:CreateTab(name)
+	if Tabs[name] then return Tabs[name].button, Tabs[name].content end
 
-_G.KreinBase = {
-    ScreenGui = ScreenGui,
-    MainFrame = MainFrame,
-    TabContainer = TabContainer,
-    ContentContainer = ContentContainer,
-    TextStyle = TextStyle,
-    TitleStyle = TitleStyle,
-    addList = addList
-}
+	local btn = Instance.new("TextButton")
+	btn.Text = name
+	btn.Size = UDim2.new(1, -10, 0, 30)
+	btn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+	btn.TextColor3 = TextStyle.Color
+	btn.Font = TextStyle.Font
+	btn.TextSize = TextStyle.Size
+	btn.Parent = TabContainer
 
-print("✅ KreinBase initialized.")
+	local content = Instance.new("Frame")
+	content.Name = name .. "Content"
+	content.Size = UDim2.new(1, -10, 1, 0)
+	content.BackgroundTransparency = 1
+	content.Visible = false
+	content.Parent = ContentContainer
+	addList(content)
+
+	btn.MouseButton1Click:Connect(function()
+		for _, v in pairs(ContentContainer:GetChildren()) do
+			if v:IsA("Frame") then
+				v.Visible = false
+			end
+		end
+		content.Visible = true
+	end)
+
+	Tabs[name] = { button = btn, content = content, count = 0 }
+	return btn
+end
+
+function KreinHub:AddButton(tabBtn, text, func)
+	local tab = nil
+	for _, v in pairs(Tabs) do
+		if v.button == tabBtn then
+			tab = v
+			break
+		end
+	end
+	if not tab then return end
+
+	local b = Instance.new("TextButton")
+	b.Text = text
+	b.Size = UDim2.new(1, -10, 0, 30)
+	b.Position = UDim2.new(0, 5, 0, tab.count * 35 + 5)
+	b.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+	b.TextColor3 = TextStyle.Color
+	b.Font = TextStyle.Font
+	b.TextSize = TextStyle.Size
+	b.Parent = tab.content
+	b.MouseButton1Click:Connect(func)
+
+	tab.count += 1
+end
+
+function KreinHub:AddToggle(tabBtn, text, func)
+	local tab = nil
+	for _, v in pairs(Tabs) do
+		if v.button == tabBtn then
+			tab = v
+			break
+		end
+	end
+	if not tab then return end
+
+	local t = Instance.new("TextButton")
+	local state = false
+	t.Text = text .. ": OFF"
+	t.Size = UDim2.new(1, -10, 0, 30)
+	t.Position = UDim2.new(0, 5, 0, tab.count * 35 + 5)
+	t.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+	t.TextColor3 = TextStyle.Color
+	t.Font = TextStyle.Font
+	t.TextSize = TextStyle.Size
+	t.Parent = tab.content
+
+	t.MouseButton1Click:Connect(function()
+		state = not state
+		t.Text = text .. ": " .. (state and "ON" or "OFF")
+		func(state)
+	end)
+
+	tab.count += 1
+end
+
+-- ✅ Expose global
+_G.KreinHub = KreinHub
