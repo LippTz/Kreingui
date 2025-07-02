@@ -1,4 +1,4 @@
---// Alif's Custom Script Hub (Editable Base) - Full Control Style + Background Dropdown in Settings Tab + Loading Animation
+--// Alif's Custom Script Hub (Editable Base) - Finalized Layout + Tab System + Responsive + Loading Animation
 
 -- UI Library
 local player = game.Players.LocalPlayer
@@ -10,7 +10,7 @@ ScreenGui.ResetOnSpawn = false
 ScreenGui.IgnoreGuiInset = true
 ScreenGui.Parent = guiService
 
--- Gaya Text Global (bisa diubah langsung)
+-- Gaya Text Global
 local TextStyle = {
     Font = Enum.Font.SourceSans,
     Size = 18,
@@ -77,11 +77,9 @@ SubText.Position = UDim2.new(0.5, 0, 0.65, 0)
 SubText.AnchorPoint = Vector2.new(0.5, 0.5)
 SubText.Parent = LoadingFrame
 
--- Animate loading popup
 LoadingFrame:TweenSize(UDim2.new(0.35, 0, 0.5, 0), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 1.5, true)
 task.wait(1.2)
 
--- Tulis animasi "Loading..." satu per satu, 3 kali
 local function Typewrite(text, label)
     label.Text = ""
     for i = 1, #text do
@@ -95,76 +93,167 @@ for i = 1, 3 do
     task.wait(0.4)
 end
 
--- Sembunyikan loading dan lanjutkan ke GUI utama
 LoadingFrame:Destroy()
-
 task.wait(1)
 
 -- GUI UTAMA
 local MainFrame = Instance.new("Frame")
-MainFrame.Size = UDim2.new(0.35, 0, 0.5, 0)
+MainFrame.Size = UDim2.new(0.45, 0, 0.5, 0)
 MainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
 MainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
 MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 MainFrame.BorderSizePixel = 0
 MainFrame.Name = "MainFrame"
-MainFrame.Visible = false
+MainFrame.Visible = true
 MainFrame.Active = true
 MainFrame.Draggable = true
 MainFrame.Parent = ScreenGui
 
--- GUI muncul dengan animasi
-MainFrame.Size = UDim2.new(0, 0, 0, 0)
-MainFrame.Visible = true
-MainFrame:TweenSize(UDim2.new(0.35, 0, 0.5, 0), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 1.2, true)
-task.wait(0.3)
+-- Header (Nama GUI + Minimize + Close)
+local Header = Instance.new("Frame")
+Header.Size = UDim2.new(1, 0, 0, 40)
+Header.Position = UDim2.new(0, 0, 0, 0)
+Header.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+Header.BorderSizePixel = 0
+Header.Name = "Header"
+Header.Parent = MainFrame
 
--- CONTINUE THE REST OF THE SCRIPT LOGIC BELOW HERE
--- (This is where features like tabs, buttons, toggles, etc. are handled)
+local Title = Instance.new("TextLabel")
+Title.Text = "KreinGui"
+Title.Font = TitleStyle.Font
+Title.TextSize = TitleStyle.Size
+Title.TextColor3 = TitleStyle.Color
+Title.BackgroundTransparency = 1
+Title.Size = UDim2.new(1, 0, 1, 0)
+Title.Position = UDim2.new(0, 10, 0, 0)
+Title.TextXAlignment = Enum.TextXAlignment.Left
+Title.Name = "Title"
+Title.Parent = Header
 
--- PLACEHOLDER UNTUK FUNGSI CUSTOM KREINHUB (SESUAIKAN DI LUAR FILE UTAMA):
+-- Minimize & Close Buttons
+local Minimize = Instance.new("TextButton")
+Minimize.Text = "_"
+Minimize.Size = UDim2.new(0, 30, 0, 30)
+Minimize.Position = UDim2.new(1, -65, 0.5, -15)
+Minimize.AnchorPoint = Vector2.new(0, 0)
+Minimize.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+Minimize.TextColor3 = Color3.new(1, 1, 1)
+Minimize.Font = TextStyle.Font
+Minimize.TextSize = 20
+Minimize.Parent = Header
+
+local Close = Instance.new("TextButton")
+Close.Text = "X"
+Close.Size = UDim2.new(0, 30, 0, 30)
+Close.Position = UDim2.new(1, -30, 0.5, -15)
+Close.AnchorPoint = Vector2.new(0, 0)
+Close.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+Close.TextColor3 = Color3.new(1, 1, 1)
+Close.Font = TextStyle.Font
+Close.TextSize = 20
+Close.Parent = Header
+
+local TabContainer = Instance.new("Frame")
+TabContainer.Size = UDim2.new(0, 120, 1, -40)
+TabContainer.Position = UDim2.new(0, 0, 0, 40)
+TabContainer.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+TabContainer.BorderSizePixel = 0
+TabContainer.Name = "TabContainer"
+TabContainer.Parent = MainFrame
+
+local ContentContainer = Instance.new("Frame")
+ContentContainer.Name = "ContentContainer"
+ContentContainer.Size = UDim2.new(1, -120, 1, -40)
+ContentContainer.Position = UDim2.new(0, 120, 0, 40)
+ContentContainer.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+ContentContainer.BorderSizePixel = 0
+ContentContainer.Parent = MainFrame
+
+-- Sistem Minimize
+local originalSize = MainFrame.Size
+local minimized = false
+
+Minimize.MouseButton1Click:Connect(function()
+    if minimized then
+        MainFrame.Size = originalSize
+        TabContainer.Visible = true
+        ContentContainer.Visible = true
+    else
+        MainFrame.Size = UDim2.new(originalSize.X.Scale, originalSize.X.Offset, 0, Header.Size.Y.Offset)
+        TabContainer.Visible = false
+        ContentContainer.Visible = false
+    end
+    minimized = not minimized
+end)
+
+Close.MouseButton1Click:Connect(function()
+    ScreenGui:Destroy()
+end)
+
+-- Fungsi Sistem Tab
 local KreinHub = {}
 local tabs = {}
 
 function KreinHub:CreateTab(name)
-    local tab = Instance.new("Frame")
-    tab.Name = name
-    tab.Size = UDim2.new(1, 0, 1, 0)
-    tab.BackgroundTransparency = 1
-    tab.Visible = false
-    tab.Parent = MainFrame
-    tabs[name] = tab
-    return tab
+    local tabBtn = Instance.new("TextButton")
+    tabBtn.Text = name
+    tabBtn.Size = UDim2.new(1, 0, 0, 30)
+    tabBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    tabBtn.TextColor3 = Color3.new(1, 1, 1)
+    tabBtn.Font = TextStyle.Font
+    tabBtn.TextSize = TextStyle.Size
+    tabBtn.Parent = TabContainer
+
+    local contentFrame = Instance.new("Frame")
+    contentFrame.Name = name .. "_Content"
+    contentFrame.Size = UDim2.new(1, 0, 1, 0)
+    contentFrame.BackgroundTransparency = 1
+    contentFrame.Visible = false
+    contentFrame.Parent = ContentContainer
+
+    local layout = Instance.new("UIListLayout", contentFrame)
+    layout.Padding = UDim.new(0, 5)
+    layout.SortOrder = Enum.SortOrder.LayoutOrder
+
+    tabs[tabBtn] = contentFrame
+
+    tabBtn.MouseButton1Click:Connect(function()
+        for btn, frame in pairs(tabs) do
+            frame.Visible = (btn == tabBtn)
+        end
+    end)
+
+    return contentFrame
 end
 
-function KreinHub:AddButton(tab, title, callback)
+function KreinHub:AddButton(tabContent, text, callback)
     local button = Instance.new("TextButton")
-    button.Size = UDim2.new(0, 150, 0, 30)
-    button.Position = UDim2.new(0, 10, 0, #tab:GetChildren() * 35)
-    button.Text = title
+    button.Text = text
+    button.Size = UDim2.new(1, -10, 0, 30)
+    button.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+    button.TextColor3 = Color3.new(1, 1, 1)
     button.Font = TextStyle.Font
     button.TextSize = TextStyle.Size
-    button.TextColor3 = TextStyle.Color
-    button.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-    button.Parent = tab
+    button.Parent = tabContent
+
     button.MouseButton1Click:Connect(callback)
 end
 
-function KreinHub:AddToggle(tab, title, callback)
+function KreinHub:AddToggle(tabContent, text, callback)
     local toggle = Instance.new("TextButton")
-    toggle.Size = UDim2.new(0, 150, 0, 30)
-    toggle.Position = UDim2.new(0, 10, 0, #tab:GetChildren() * 35)
-    toggle.Text = title .. ": OFF"
+    toggle.Text = text .. ": OFF"
+    toggle.Size = UDim2.new(1, -10, 0, 30)
+    toggle.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+    toggle.TextColor3 = Color3.new(1, 1, 1)
     toggle.Font = TextStyle.Font
     toggle.TextSize = TextStyle.Size
-    toggle.TextColor3 = TextStyle.Color
-    toggle.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-    toggle.Parent = tab
+    toggle.Parent = tabContent
 
     local state = false
+
     toggle.MouseButton1Click:Connect(function()
         state = not state
-        toggle.Text = title .. ": " .. (state and "ON" or "OFF")
+        toggle.Text = text .. (state and ": ON" or ": OFF")
         callback(state)
     end)
 end
