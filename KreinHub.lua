@@ -38,45 +38,52 @@ MainFrame.Parent = ScreenGui
 local UICorner = Instance.new("UICorner", MainFrame)
 UICorner.CornerRadius = UDim.new(0, 8)
 
--- Header
-local Header = Instance.new("Frame")
-Header.Name = "Header"
-Header.Size = UDim2.new(1, 0, 0, 40)
-Header.BackgroundTransparency = 1
-Header.Parent = MainFrame
-
+-- GUI Title
 local TitleLabel = Instance.new("TextLabel")
-TitleLabel.Size = UDim2.new(1, -80, 1, 0)
-TitleLabel.Position = UDim2.new(0, 10, 0, 0)
+TitleLabel.Size = UDim2.new(1, 0, 0, 40)
+TitleLabel.Position = UDim2.new(0, 0, 0, 0)
 TitleLabel.BackgroundTransparency = 1
-TitleLabel.Text = "KreinGui"
+TitleLabel.Text = "KreinHub"
 TitleLabel.Font = TitleStyle.Font
 TitleLabel.TextSize = TitleStyle.Size
 TitleLabel.TextColor3 = TitleStyle.Color
 TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
-TitleLabel.Parent = Header
+TitleLabel.PaddingLeft = UDim.new(0, 10)
+TitleLabel.Parent = MainFrame
+
+-- Minimize & Close Buttons
+local CloseButton = Instance.new("TextButton")
+CloseButton.Size = UDim2.new(0, 30, 0, 30)
+CloseButton.Position = UDim2.new(1, -35, 0, 5)
+CloseButton.Text = "X"
+CloseButton.TextColor3 = Color3.new(1, 1, 1)
+CloseButton.BackgroundColor3 = Color3.fromRGB(170, 50, 50)
+CloseButton.Parent = MainFrame
 
 local MinimizeButton = Instance.new("TextButton")
 MinimizeButton.Size = UDim2.new(0, 30, 0, 30)
-MinimizeButton.Position = UDim2.new(1, -70, 0.5, -15)
-MinimizeButton.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
+MinimizeButton.Position = UDim2.new(1, -70, 0, 5)
 MinimizeButton.Text = "-"
-MinimizeButton.Parent = Header
+MinimizeButton.TextColor3 = Color3.new(1, 1, 1)
+MinimizeButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+MinimizeButton.Parent = MainFrame
 
-local CloseButton = Instance.new("TextButton")
-CloseButton.Size = UDim2.new(0, 30, 0, 30)
-CloseButton.Position = UDim2.new(1, -35, 0.5, -15)
-CloseButton.BackgroundColor3 = Color3.fromRGB(200, 60, 60)
-CloseButton.Text = "X"
-CloseButton.Parent = Header
+local isMinimized = false
+local originalSize = MainFrame.Size
+MinimizeButton.MouseButton1Click:Connect(function()
+    isMinimized = not isMinimized
+    MainFrame.Size = isMinimized and UDim2.new(originalSize.X.Scale, originalSize.X.Offset, 0, 40) or originalSize
+end)
+
+CloseButton.MouseButton1Click:Connect(function()
+    ScreenGui:Destroy()
+end)
 
 -- Tab Container
-local TabContainer = Instance.new("ScrollingFrame")
+local TabContainer = Instance.new("Frame")
 TabContainer.Size = UDim2.new(0, 120, 1, -40)
 TabContainer.Position = UDim2.new(0, 0, 0, 40)
 TabContainer.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-TabContainer.CanvasSize = UDim2.new(0, 0, 0, 0)
-TabContainer.ScrollBarThickness = 4
 TabContainer.Parent = MainFrame
 
 local TabListLayout = Instance.new("UIListLayout")
@@ -100,92 +107,35 @@ function addList(parent)
     layout.Parent = parent
 end
 
-local Tabs = {}
-local Krein = {}
+-- Scrollable container helper
+function addScrollable(parent)
+    local scroll = Instance.new("ScrollingFrame")
+    scroll.Size = UDim2.new(1, 0, 1, 0)
+    scroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+    scroll.ScrollBarThickness = 6
+    scroll.BackgroundTransparency = 1
+    scroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
+    scroll.ClipsDescendants = true
+    scroll.Parent = parent
 
-function Krein:CreateTab(name)
-    if Tabs[name] then return Tabs[name].button, Tabs[name].content end
+    local layout = Instance.new("UIListLayout")
+    layout.SortOrder = Enum.SortOrder.LayoutOrder
+    layout.Padding = UDim.new(0, 5)
+    layout.Parent = scroll
 
-    local btn = Instance.new("TextButton")
-    btn.Text = name
-    btn.Size = UDim2.new(1, -10, 0, 30)
-    btn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-    btn.TextColor3 = TextStyle.Color
-    btn.Font = TextStyle.Font
-    btn.TextSize = TextStyle.Size
-    btn.Parent = TabContainer
-
-    local content = Instance.new("Frame")
-    content.Name = name .. "Content"
-    content.Size = UDim2.new(1, 0, 1, 0)
-    content.BackgroundTransparency = 1
-    content.Visible = false
-    content.Parent = ContentContainer
-    addList(content)
-
-    btn.MouseButton1Click:Connect(function()
-        for _, v in pairs(ContentContainer:GetChildren()) do
-            if v:IsA("Frame") then v.Visible = false end
-        end
-        content.Visible = true
-    end)
-
-    Tabs[name] = {button = btn, content = content, count = 0}
-    return btn
+    return scroll
 end
 
-function Krein:AddButton(tabBtn, text, func)
-    local tab
-    for _, v in pairs(Tabs) do if v.button == tabBtn then tab = v end end
-    if not tab then return end
+-- Global reference
+_G.KreinBase = {
+    ScreenGui = ScreenGui,
+    MainFrame = MainFrame,
+    TabContainer = TabContainer,
+    ContentContainer = ContentContainer,
+    TextStyle = TextStyle,
+    TitleStyle = TitleStyle,
+    addList = addList,
+    addScrollable = addScrollable
+}
 
-    local b = Instance.new("TextButton")
-    b.Text = text
-    b.Size = UDim2.new(1, -10, 0, 30)
-    b.Position = UDim2.new(0, 5, 0, tab.count * 35 + 5)
-    b.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
-    b.TextColor3 = TextStyle.Color
-    b.Font = TextStyle.Font
-    b.TextSize = TextStyle.Size
-    b.Parent = tab.content
-    b.MouseButton1Click:Connect(func)
-
-    tab.count += 1
-end
-
-function Krein:AddToggle(tabBtn, text, func)
-    local tab
-    for _, v in pairs(Tabs) do if v.button == tabBtn then tab = v end end
-    if not tab then return end
-
-    local t = Instance.new("TextButton")
-    local state = false
-    t.Text = text .. ": OFF"
-    t.Size = UDim2.new(1, -10, 0, 30)
-    t.Position = UDim2.new(0, 5, 0, tab.count * 35 + 5)
-    t.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
-    t.TextColor3 = TextStyle.Color
-    t.Font = TextStyle.Font
-    t.TextSize = TextStyle.Size
-    t.Parent = tab.content
-    t.MouseButton1Click:Connect(function()
-        state = not state
-        t.Text = text .. ": " .. (state and "ON" or "OFF")
-        func(state)
-    end)
-
-    tab.count += 1
-end
-
-MinimizeButton.MouseButton1Click:Connect(function()
-    ContentContainer.Visible = not ContentContainer.Visible
-    TabContainer.Visible = not TabContainer.Visible
-end)
-
-CloseButton.MouseButton1Click:Connect(function()
-    ScreenGui:Destroy()
-end)
-
-_G.KreinBase = Krein
-
-print("✅ KreinHub loaded.")
+print("✅ KreinBase initialized.")
