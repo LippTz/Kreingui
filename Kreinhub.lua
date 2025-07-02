@@ -1,4 +1,4 @@
--- UI Library
+-- KreinHub Library with Editable Tab and Loading Popup Animation
 local player = game.Players.LocalPlayer
 local guiService = player:WaitForChild("PlayerGui")
 
@@ -7,19 +7,6 @@ ScreenGui.Name = "KreinHub"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.IgnoreGuiInset = true
 ScreenGui.Parent = guiService
-
--- Gaya Text Global (bisa diubah langsung)
-local TextStyle = {
-    Font = Enum.Font.SourceSans,
-    Size = 18,
-    Color = Color3.new(1, 1, 1)
-}
-
-local TitleStyle = {
-    Font = Enum.Font.SourceSansBold,
-    Size = 24,
-    Color = Color3.new(1, 1, 1)
-}
 
 -- Notifikasi bawah kanan
 local notif = Instance.new("TextLabel")
@@ -42,9 +29,7 @@ task.delay(2.5, function()
     notif:Destroy()
 end)
 
-task.wait(2.3)
-
--- Loading Animation
+-- Animasi Loading Popup
 local LoadingFrame = Instance.new("Frame")
 LoadingFrame.Size = UDim2.new(0, 0, 0, 0)
 LoadingFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
@@ -55,7 +40,7 @@ LoadingFrame.Parent = ScreenGui
 
 local LoadingText = Instance.new("TextLabel")
 LoadingText.Text = "KreinGui"
-LoadingText.Font = TitleStyle.Font
+LoadingText.Font = Enum.Font.SourceSansBold
 LoadingText.TextSize = 28
 LoadingText.TextColor3 = Color3.new(1, 1, 1)
 LoadingText.BackgroundTransparency = 1
@@ -66,7 +51,7 @@ LoadingText.Parent = LoadingFrame
 
 local SubText = Instance.new("TextLabel")
 SubText.Text = ""
-SubText.Font = TextStyle.Font
+SubText.Font = Enum.Font.SourceSans
 SubText.TextSize = 20
 SubText.TextColor3 = Color3.new(1, 1, 1)
 SubText.BackgroundTransparency = 1
@@ -75,11 +60,9 @@ SubText.Position = UDim2.new(0.5, 0, 0.65, 0)
 SubText.AnchorPoint = Vector2.new(0.5, 0.5)
 SubText.Parent = LoadingFrame
 
--- Animate loading popup
 LoadingFrame:TweenSize(UDim2.new(0.35, 0, 0.5, 0), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 1.5, true)
 task.wait(1.2)
 
--- Tulis animasi "Loading..." satu per satu, 3 kali
 local function Typewrite(text, label)
     label.Text = ""
     for i = 1, #text do
@@ -93,176 +76,138 @@ for i = 1, 3 do
     task.wait(0.4)
 end
 
--- Sembunyikan loading dan lanjutkan ke GUI utama
 LoadingFrame:Destroy()
-
 task.wait(1)
 
--- GUI UTAMA
+-- GUI Utama
 local MainFrame = Instance.new("Frame")
-MainFrame.Size = UDim2.new(0.6, 0, 0.6, 0)
+MainFrame.Size = UDim2.new(0.5, 0, 0.6, 0)
 MainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
 MainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
 MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 MainFrame.BorderSizePixel = 0
-MainFrame.Name = "MainFrame"
-MainFrame.Visible = false
 MainFrame.Active = true
 MainFrame.Draggable = true
 MainFrame.Parent = ScreenGui
 
-MainFrame.Size = UDim2.new(0, 0, 0, 0)
-MainFrame.Visible = true
-MainFrame:TweenSize(UDim2.new(0.6, 0, 0.6, 0), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 1.2, true)
-task.wait(0.3)
-
--- Header (Nama GUI dan Tombol)
+-- Header (Top Bar)
 local Header = Instance.new("Frame")
-Header.Name = "Header"
-Header.Size = UDim2.new(1, 0, 0, 30)
-Header.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+Header.Size = UDim2.new(1, 0, 0, 40)
+Header.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+Header.BorderSizePixel = 0
 Header.Parent = MainFrame
 
 local Title = Instance.new("TextLabel")
 Title.Text = "KreinGui"
-Title.Font = TitleStyle.Font
-Title.TextSize = TitleStyle.Size
-Title.TextColor3 = TitleStyle.Color
+Title.Font = Enum.Font.SourceSansBold
+Title.TextSize = 22
+Title.TextColor3 = Color3.new(1, 1, 1)
 Title.BackgroundTransparency = 1
-Title.Position = UDim2.new(0.5, 0, 0, 0)
-Title.AnchorPoint = Vector2.new(0.5, 0)
 Title.Size = UDim2.new(0, 200, 1, 0)
+Title.Position = UDim2.new(0.5, -100, 0, 0)
 Title.Parent = Header
 
-local Close = Instance.new("TextButton")
-Close.Size = UDim2.new(0, 30, 1, 0)
-Close.Position = UDim2.new(1, -30, 0, 0)
-Close.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
-Close.Text = "X"
-Close.Font = Enum.Font.SourceSansBold
-Close.TextSize = 18
-Close.TextColor3 = Color3.new(1, 1, 1)
-Close.Parent = Header
+-- Close Button
+local CloseButton = Instance.new("TextButton")
+CloseButton.Text = "X"
+CloseButton.Size = UDim2.new(0, 40, 1, 0)
+CloseButton.Position = UDim2.new(1, -40, 0, 0)
+CloseButton.BackgroundColor3 = Color3.fromRGB(170, 0, 0)
+CloseButton.TextColor3 = Color3.new(1, 1, 1)
+CloseButton.Font = Enum.Font.SourceSansBold
+CloseButton.TextSize = 18
+CloseButton.Parent = Header
 
-local Minimize = Instance.new("TextButton")
-Minimize.Size = UDim2.new(0, 30, 1, 0)
-Minimize.Position = UDim2.new(1, -60, 0, 0)
-Minimize.BackgroundColor3 = Color3.fromRGB(255, 180, 0)
-Minimize.Text = "-"
-Minimize.Font = Enum.Font.SourceSansBold
-Minimize.TextSize = 18
-Minimize.TextColor3 = Color3.new(1, 1, 1)
-Minimize.Parent = Header
-
--- Fungsi tombol
-local minimized = false
-local originalSize = MainFrame.Size
-
-Minimize.MouseButton1Click:Connect(function()
-    if minimized then
-        MainFrame:TweenSize(originalSize, Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.3, true)
-    else
-        MainFrame:TweenSize(UDim2.new(originalSize.X.Scale, originalSize.X.Offset, 0, 30), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.3, true)
-    end
-    minimized = not minimized
-end)
-
-Close.MouseButton1Click:Connect(function()
+CloseButton.MouseButton1Click:Connect(function()
     ScreenGui:Destroy()
 end)
 
--- Tab dan Kontainer Isi
-local TabsFrame = Instance.new("Frame")
-TabsFrame.Name = "TabsFrame"
-TabsFrame.Size = UDim2.new(0, 120, 1, -30)
-TabsFrame.Position = UDim2.new(0, 0, 0, 30)
-TabsFrame.BackgroundTransparency = 1
-TabsFrame.Parent = MainFrame
+-- Minimize Button
+local MinimizeButton = Instance.new("TextButton")
+MinimizeButton.Text = "_"
+MinimizeButton.Size = UDim2.new(0, 40, 1, 0)
+MinimizeButton.Position = UDim2.new(1, -80, 0, 0)
+MinimizeButton.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+MinimizeButton.TextColor3 = Color3.new(1, 1, 1)
+MinimizeButton.Font = Enum.Font.SourceSansBold
+MinimizeButton.TextSize = 18
+MinimizeButton.Parent = Header
 
-local UIList = Instance.new("UIListLayout", TabsFrame)
-UIList.FillDirection = Enum.FillDirection.Vertical
-UIList.SortOrder = Enum.SortOrder.LayoutOrder
-UIList.Padding = UDim.new(0, 4)
+local ContentVisible = true
+local OriginalSize = MainFrame.Size
 
-local ContentFrame = Instance.new("Frame")
-ContentFrame.Name = "ContentFrame"
-ContentFrame.Size = UDim2.new(1, -130, 1, -30)
-ContentFrame.Position = UDim2.new(0, 130, 0, 30)
-ContentFrame.BackgroundTransparency = 1
-ContentFrame.Parent = MainFrame
+MinimizeButton.MouseButton1Click:Connect(function()
+    ContentVisible = not ContentVisible
+    if ContentVisible then
+        MainFrame:TweenSize(OriginalSize, Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.3, true)
+    else
+        MainFrame:TweenSize(UDim2.new(OriginalSize.X.Scale, OriginalSize.X.Offset, 0, Header.Size.Y.Offset), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.3, true)
+    end
+end)
 
+-- Container untuk Tab (siap ditambahkan dari luar)
+local TabContainer = Instance.new("Frame")
+TabContainer.Name = "TabContainer"
+TabContainer.Size = UDim2.new(1, -20, 1, -60)
+TabContainer.Position = UDim2.new(0, 10, 0, 50)
+TabContainer.BackgroundTransparency = 1
+TabContainer.Parent = MainFrame
+
+-- Layout isi tab
+local UIListLayout = Instance.new("UIListLayout")
+UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+UIListLayout.Padding = UDim.new(0, 6)
+UIListLayout.Parent = TabContainer
+
+-- Siap menerima tab dari luar
 local KreinHub = {}
-KreinHub.Tabs = {}
-
 function KreinHub:CreateTab(name)
-    local tabButton = Instance.new("TextButton")
-    tabButton.Size = UDim2.new(1, -10, 0, 30)
-    tabButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-    tabButton.TextColor3 = Color3.new(1, 1, 1)
-    tabButton.Font = Enum.Font.SourceSansBold
-    tabButton.TextSize = 18
-    tabButton.Text = name
-    tabButton.Parent = TabsFrame
+    local tabFrame = Instance.new("Frame")
+    tabFrame.Size = UDim2.new(1, 0, 0, 30)
+    tabFrame.BackgroundTransparency = 1
+    tabFrame.LayoutOrder = #TabContainer:GetChildren()
+    tabFrame.Parent = TabContainer
 
-    local content = Instance.new("Frame")
-    content.Size = UDim2.new(1, 0, 1, 0)
-    content.BackgroundTransparency = 1
-    content.Visible = false
-    content.Parent = ContentFrame
+    local label = Instance.new("TextLabel")
+    label.Text = name
+    label.Size = UDim2.new(0, 200, 1, 0)
+    label.Font = Enum.Font.SourceSansBold
+    label.TextSize = 20
+    label.TextColor3 = Color3.new(1, 1, 1)
+    label.BackgroundTransparency = 1
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    label.Parent = tabFrame
 
-    local layout = Instance.new("UIListLayout", content)
-    layout.Padding = UDim.new(0, 6)
-    layout.SortOrder = Enum.SortOrder.LayoutOrder
-
-    tabButton.MouseButton1Click:Connect(function()
-        for _, v in pairs(ContentFrame:GetChildren()) do
-            if v:IsA("Frame") then
-                v.Visible = false
-            end
-        end
-        content.Visible = true
-    end)
-
-    self.Tabs[name] = content
-    return name
+    return tabFrame
 end
 
-function KreinHub:AddButton(tabName, text, callback)
-    local content = self.Tabs[tabName]
-    if not content then return end
-
-    local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(1, -10, 0, 30)
-    btn.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
-    btn.TextColor3 = Color3.new(1, 1, 1)
-    btn.Font = Enum.Font.SourceSans
-    btn.TextSize = 16
-    btn.Text = text
-    btn.Parent = content
-
-    btn.MouseButton1Click:Connect(function()
-        pcall(callback)
-    end)
+function KreinHub:AddButton(tab, text, callback)
+    local button = Instance.new("TextButton")
+    button.Size = UDim2.new(0, 180, 0, 30)
+    button.Text = text
+    button.Font = Enum.Font.SourceSans
+    button.TextSize = 18
+    button.TextColor3 = Color3.new(1, 1, 1)
+    button.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+    button.Parent = tab
+    button.MouseButton1Click:Connect(callback)
 end
 
-function KreinHub:AddToggle(tabName, text, callback)
-    local content = self.Tabs[tabName]
-    if not content then return end
-
+function KreinHub:AddToggle(tab, text, callback)
     local toggle = Instance.new("TextButton")
-    toggle.Size = UDim2.new(1, -10, 0, 30)
-    toggle.BackgroundColor3 = Color3.fromRGB(90, 90, 90)
-    toggle.TextColor3 = Color3.new(1, 1, 1)
+    toggle.Size = UDim2.new(0, 180, 0, 30)
+    toggle.Text = text .. ": OFF"
     toggle.Font = Enum.Font.SourceSans
-    toggle.TextSize = 16
-    toggle.Text = text .. " [OFF]"
-    toggle.Parent = content
+    toggle.TextSize = 18
+    toggle.TextColor3 = Color3.new(1, 1, 1)
+    toggle.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+    toggle.Parent = tab
 
     local state = false
     toggle.MouseButton1Click:Connect(function()
         state = not state
-        toggle.Text = text .. (state and " [ON]" or " [OFF]")
-        pcall(callback, state)
+        toggle.Text = text .. ": " .. (state and "ON" or "OFF")
+        callback(state)
     end)
 end
 
