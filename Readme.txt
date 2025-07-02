@@ -1,3 +1,5 @@
+HOW TO BUILD MY HUB
+
 -- Get the library first
 local KreinHub = loadstring(game:HttpGet("https://raw.githubusercontent.com/LippTz/Kreingui/refs/heads/main/Kreinhub.lua"))()
 
