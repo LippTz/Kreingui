@@ -54,6 +54,7 @@ local TabContainer = Instance.new("Frame")
 TabContainer.Size = UDim2.new(0, 120, 1, -40)
 TabContainer.Position = UDim2.new(0, 0, 0, 40)
 TabContainer.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+TabContainer.Name = "TabContainer"
 TabContainer.Parent = MainFrame
 
 local TabListLayout = Instance.new("UIListLayout")
@@ -87,93 +88,4 @@ _G.KreinBase = {
     addList = addList
 }
 
--- Modular Logic (CreateTab, AddButton, AddToggle)
-local Tabs = {}
-local KreinHub = {}
-
-function KreinHub:CreateTab(name)
-    if Tabs[name] then return Tabs[name].button, Tabs[name].content end
-
-    local btn = Instance.new("TextButton")
-    btn.Text = name
-    btn.Size = UDim2.new(1, -10, 0, 30)
-    btn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-    btn.TextColor3 = TextStyle.Color
-    btn.Font = TextStyle.Font
-    btn.TextSize = TextStyle.Size
-    btn.Parent = TabContainer
-
-    local content = Instance.new("Frame")
-    content.Name = name .. "_Content"
-    content.Size = UDim2.new(1, 0, 1, 0)
-    content.BackgroundTransparency = 1
-    content.Visible = false
-    content.Parent = ContentContainer
-    addList(content)
-
-    btn.MouseButton1Click:Connect(function()
-        for _, v in pairs(ContentContainer:GetChildren()) do
-            if v:IsA("Frame") then
-                v.Visible = false
-            end
-        end
-        content.Visible = true
-    end)
-
-    Tabs[name] = { button = btn, content = content, count = 0 }
-    return btn
-end
-
-function KreinHub:AddButton(tabBtn, text, func)
-    local tab = nil
-    for _, v in pairs(Tabs) do
-        if v.button == tabBtn then tab = v break end
-    end
-    if not tab then return end
-
-    local b = Instance.new("TextButton")
-    b.Text = text
-    b.Size = UDim2.new(1, -10, 0, 30)
-    b.Position = UDim2.new(0, 5, 0, tab.count * 35 + 5)
-    b.BackgroundColor3 = Color3.fromRGB(60,60,60)
-    b.TextColor3 = TextStyle.Color
-    b.Font = TextStyle.Font
-    b.TextSize = TextStyle.Size
-    b.Parent = tab.content
-
-    b.MouseButton1Click:Connect(func)
-
-    tab.count += 1
-end
-
-function KreinHub:AddToggle(tabBtn, text, func)
-    local tab = nil
-    for _, v in pairs(Tabs) do
-        if v.button == tabBtn then tab = v break end
-    end
-    if not tab then return end
-
-    local t = Instance.new("TextButton")
-    t.Text = text .. ": OFF"
-    t.Size = UDim2.new(1, -10, 0, 30)
-    t.Position = UDim2.new(0, 5, 0, tab.count * 35 + 5)
-    t.BackgroundColor3 = Color3.fromRGB(60,60,60)
-    t.TextColor3 = TextStyle.Color
-    t.Font = TextStyle.Font
-    t.TextSize = TextStyle.Size
-    t.Parent = tab.content
-
-    local state = false
-    t.MouseButton1Click:Connect(function()
-        state = not state
-        t.Text = text .. ": " .. (state and "ON" or "OFF")
-        func(state)
-    end)
-
-    tab.count += 1
-end
-
--- Return to allow loader access
-return KreinHub
-
-print("✅ KreinHub Modular System Ready.")
+return _G.KreinBase
